@@ -1,5 +1,5 @@
 import express from "express";
-
+import multer from "multer";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import {
@@ -26,11 +26,29 @@ mongoose
 
 const app = express();
 
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => {
+    cb(null, "uploads");
+  },
+  filename: (_, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 app.post("/auth/register", registerValidation, UseController.register);
 app.post("/auth/login", loginValidation, UseController.login);
 app.get("/auth/me", checkAuth, UseController.getMe);
+
+app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
+  res.json({
+    url: `/uploads/${req.file.originalname}`,
+  });
+});
 
 app.get("/posts", PostController.getAll);
 app.get("/posts/:id", PostController.getOne);
