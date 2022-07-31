@@ -2,7 +2,7 @@ import express from "express";
 
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { registerValidation } from "./validations/auth.js";
+import { registerValidation, loginValidation } from "./validation.js";
 
 import checkAuth from "./utils/checkAuth.js";
 
@@ -24,7 +24,7 @@ const app = express();
 app.use(express.json());
 
 app.post("/auth/register", registerValidation, UseController.register);
-app.post("/auth/login", UseController.login);
+app.post("/auth/login", loginValidation, UseController.login);
 app.get("/auth/me", checkAuth, UseController.getMe);
 
 app.listen(process.env.PORT || 5555, (error) => {
