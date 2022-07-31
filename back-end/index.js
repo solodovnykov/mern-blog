@@ -22,6 +22,51 @@ const app = express();
 
 app.use(express.json());
 
+app.post("/auth/login", async (req, res) => {
+  try {
+    const user = await UserModel.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json({
+        //The username or password is incorrect
+        message: "User not found",
+      });
+    }
+
+    const isValidPassword = await argon2.verify(
+      user._doc.passwordHash,
+      req.body.password
+    );
+
+    if (!isValidPassword) {
+      return res.status(404).json({
+        message: "The username or password is incorrect",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        _id: user._id,
+      },
+      process.env.JWT_KEY,
+      {
+        expiresIn: "30d",
+      }
+    );
+
+    const { passwordHash, ...useData } = user._doc;
+
+    res.json({
+      ...useData,
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Authorization failed",
+    });
+  }
+});
+
 app.post("/auth/register", registerValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
