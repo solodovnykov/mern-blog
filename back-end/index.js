@@ -12,6 +12,7 @@ import checkAuth from "./utils/checkAuth.js";
 
 import * as UseController from "./controllers/UserController.js";
 import * as PostController from "./controllers/PostController.js";
+import handleValidationErrors from "./utils/handleValidationErrors.js";
 
 dotenv.config();
 
@@ -40,8 +41,18 @@ const upload = multer({ storage });
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-app.post("/auth/register", registerValidation, UseController.register);
-app.post("/auth/login", loginValidation, UseController.login);
+app.post(
+  "/auth/register",
+  registerValidation,
+  handleValidationErrors,
+  UseController.register
+);
+app.post(
+  "/auth/login",
+  loginValidation,
+  handleValidationErrors,
+  UseController.login
+);
 app.get("/auth/me", checkAuth, UseController.getMe);
 
 app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
@@ -52,9 +63,20 @@ app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
 
 app.get("/posts", PostController.getAll);
 app.get("/posts/:id", PostController.getOne);
-app.post("/posts", checkAuth, postCreateValidation, PostController.create);
+app.post(
+  "/posts",
+  checkAuth,
+  postCreateValidation,
+  handleValidationErrors,
+  PostController.create
+);
 app.delete("/posts/:id", checkAuth, PostController.remove);
-app.patch("/posts/:id", checkAuth, PostController.update);
+app.patch(
+  "/posts/:id",
+  checkAuth,
+  handleValidationErrors,
+  PostController.update
+);
 
 app.listen(process.env.PORT || 5555, (error) => {
   if (error) {

@@ -1,15 +1,9 @@
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
-import { validationResult } from "express-validator";
 import UserModel from "../models/User.js";
 
 export const register = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json(errors.array());
-    }
-
     const password = req.body.password;
     const hash = await argon2.hash(password, { type: argon2.argon2id });
 
