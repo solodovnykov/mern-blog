@@ -2,17 +2,14 @@ import express from "express";
 import multer from "multer";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+
 import {
   registerValidation,
   loginValidation,
   postCreateValidation,
 } from "./validation.js";
-
-import checkAuth from "./utils/checkAuth.js";
-
-import * as UseController from "./controllers/UserController.js";
-import * as PostController from "./controllers/PostController.js";
-import handleValidationErrors from "./utils/handleValidationErrors.js";
+import { UserController, PostController } from "./controllers/index.js";
+import { checkAuth, handleValidationErrors } from "./utils/index.js";
 
 dotenv.config();
 
@@ -45,15 +42,15 @@ app.post(
   "/auth/register",
   registerValidation,
   handleValidationErrors,
-  UseController.register
+  UserController.register
 );
 app.post(
   "/auth/login",
   loginValidation,
   handleValidationErrors,
-  UseController.login
+  UserController.login
 );
-app.get("/auth/me", checkAuth, UseController.getMe);
+app.get("/auth/me", checkAuth, UserController.getMe);
 
 app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
   res.json({
