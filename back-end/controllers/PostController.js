@@ -2,9 +2,23 @@ import PostModel from "../models/Post.js";
 
 export const getAll = async (req, res) => {
   try {
-    const posts = await PostModel.find().populate("user").exec();
+    let { page = 1, size = 5 } = req.query;
 
-    res.json(posts);
+    const limit = parseInt(size);
+    const skip = (parseInt(page) - 1) * size;
+    const total = await PostModel.countDocuments({});
+
+    const posts = await PostModel.find()
+      .limit(limit)
+      .skip(skip)
+      .populate("user")
+      .exec();
+
+    res.json({
+      currentPage: parseInt(page),
+      numberOfPages: Math.ceil(total / limit),
+      data: posts,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({
