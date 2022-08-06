@@ -34,8 +34,15 @@ export const Login = () => {
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
 
-  const onSubmit = (values) => {
-    dispatch(fetchAuth(values));
+  const onSubmit = async (values) => {
+    const data = await dispatch(fetchAuth(values));
+
+    if (!data.payload) {
+      alert("Failed to login");
+    }
+    if ("token" in data.payload) {
+      window.localStorage.setItem("token", data.payload.token);
+    }
   };
 
   if (isAuth) {
