@@ -1,5 +1,4 @@
 import PostModel from "../models/Post.js";
-import { promisify } from "util";
 import fs from "fs";
 
 export const getLastTags = async (req, res) => {
@@ -110,9 +109,11 @@ export const create = async (req, res) => {
 };
 
 export const remove = async (req, res) => {
-  const unlinkAsync = promisify(fs.unlink);
   try {
     const postId = req.params.id;
+
+    const post = await PostModel.findById(postId);
+    const fileUrl = post.imageUrl;
 
     PostModel.findOneAndRemove(
       {
@@ -136,7 +137,8 @@ export const remove = async (req, res) => {
           success: true,
         });
 
-        // await unlinkAsync(req.file.path)
+        //remove image from file storage
+        fs.unlinkSync(`.${fileUrl}`);
       }
     );
   } catch (error) {
