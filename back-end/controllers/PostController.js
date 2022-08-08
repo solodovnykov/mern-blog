@@ -153,6 +153,13 @@ export const update = async (req, res) => {
   try {
     const postId = req.params.id;
 
+    const post = await PostModel.findById(postId);
+    const fileUrl = post.imageUrl;
+
+    if (req.body.imageUrl !== fileUrl) {
+      fs.unlinkSync(`.${fileUrl}`);
+    }
+
     await PostModel.updateOne(
       {
         _id: postId,
@@ -169,6 +176,8 @@ export const update = async (req, res) => {
     res.json({
       success: true,
     });
+    console.log("Req URL:", req.body.imageUrl);
+    console.log("Url by ID:", fileUrl);
   } catch (error) {
     console.log(error);
     res.status(500).json({

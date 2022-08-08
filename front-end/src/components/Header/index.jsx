@@ -26,7 +26,16 @@ export const Header = () => {
             <div>Mern Blog</div>
           </Link>
           <div className={styles.buttons}>
-            {isAuth ? (
+            {!window.localStorage.getItem("token") && !isAuth ? (
+              <>
+                <Link to="/login">
+                  <Button variant="outlined">Sign In</Button>
+                </Link>
+                <Link to="/register">
+                  <Button variant="contained">Sign Up</Button>
+                </Link>
+              </>
+            ) : (
               <>
                 <Link to="/add-post">
                   <Button variant="contained">Create post</Button>
@@ -37,15 +46,6 @@ export const Header = () => {
                   color="error">
                   Exit
                 </Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="outlined">Sign In</Button>
-                </Link>
-                <Link to="/register">
-                  <Button variant="contained">Sign Up</Button>
-                </Link>
               </>
             )}
           </div>
