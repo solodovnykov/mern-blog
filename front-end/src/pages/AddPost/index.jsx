@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
@@ -8,10 +8,11 @@ import "easymde/dist/easymde.min.css";
 import styles from "./AddPost.module.scss";
 import { useSelector } from "react-redux";
 import { selectIsAuth } from "../../redux/slices/auth";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, useParams } from "react-router-dom";
 import axios from "../../axios";
 
 export const AddPost = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const isAuth = useSelector(selectIsAuth);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -20,6 +21,7 @@ export const AddPost = () => {
   const [tags, setTags] = React.useState("");
   const [imageUrl, setImageUrl] = React.useState("");
   const inputFileRef = useRef(null);
+  const isEditing = Boolean(id);
 
   const handleChangeFile = async (event) => {
     try {
@@ -51,10 +53,12 @@ export const AddPost = () => {
         tags,
         imageUrl,
       };
-      const { data } = await axios.post("/posts", fields);
-      const id = data._id;
+      const { data } = isEditing
+        ? await axios.patch(`/posts/${id}`, fields)
+        : await axios.post("/posts", fields);
+      const _id = isEditing ? id : data._id;
 
-      navigate(`/posts/${id}`);
+      navigate(`/posts/${_id}`);
     } catch (error) {
       console.warn(error);
       alert("Failed to create post");
@@ -75,6 +79,20 @@ export const AddPost = () => {
     }),
     []
   );
+
+  useEffect(() => {
+    if (id) {
+      axios
+        .get(`/posts/${id}`)
+        .then(({ data }) => {
+          setTitle(data.title);
+          setText(data.text);
+          setTags(data.tags.join(","));
+          setImageUrl(data.imageUrl);
+        })
+        .catch((error) => console.warn(error));
+    }
+  }, []);
 
   if (!window.localStorage.getItem("token") && !isAuth) {
     return <Navigate to="/" />;
@@ -137,7 +155,7 @@ export const AddPost = () => {
       />
       <div className={styles.buttons}>
         <Button onClick={onSubmit} size="large" variant="contained">
-          Publish
+          {isEditing ? "Edit" : "Publish"}
         </Button>
         <a href="/">
           <Button size="large">Cancel</Button>

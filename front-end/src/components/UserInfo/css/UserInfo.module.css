@@ -1,0 +1,35 @@
+.root {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 30px;
+  margin-right: 10px;
+}
+
+.userName {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.userDetails {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.additional {
+  font-size: 12px;
+  opacity: 0.6;
+}

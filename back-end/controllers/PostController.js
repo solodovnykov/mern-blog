@@ -1,4 +1,6 @@
 import PostModel from "../models/Post.js";
+import { promisify } from "util";
+import fs from "fs";
 
 export const getLastTags = async (req, res) => {
   try {
@@ -108,6 +110,7 @@ export const create = async (req, res) => {
 };
 
 export const remove = async (req, res) => {
+  const unlinkAsync = promisify(fs.unlink);
   try {
     const postId = req.params.id;
 
@@ -132,6 +135,8 @@ export const remove = async (req, res) => {
         res.json({
           success: true,
         });
+
+        // await unlinkAsync(req.file.path)
       }
     );
   } catch (error) {
@@ -155,7 +160,7 @@ export const update = async (req, res) => {
         text: req.body.text,
         imageUrl: req.body.imageUrl,
         user: req.userId,
-        tags: req.body.tags,
+        tags: req.body.tags.split(","),
       }
     );
 
