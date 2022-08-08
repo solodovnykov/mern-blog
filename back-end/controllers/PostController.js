@@ -77,7 +77,7 @@ export const getOne = async (req, res) => {
 
         res.json(doc);
       }
-    ).populate('user');
+    ).populate("user");
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -91,7 +91,7 @@ export const create = async (req, res) => {
     const doc = new PostModel({
       title: req.body.title,
       text: req.body.text,
-      tags: req.body.tags,
+      tags: req.body.tags.split(","),
       imageUrl: req.body.imageUrl,
       user: req.userId,
     });

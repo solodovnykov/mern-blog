@@ -24,6 +24,8 @@ export const Home = () => {
     dispatch(fetchTags());
   }, []);
 
+  console.log(posts.items.data);
+
   return (
     <>
       <Tabs
@@ -41,9 +43,13 @@ export const Home = () => {
                 <Post key={index} isLoading={true} />
               ) : (
                 <Post
-                  _id={item._id}
+                  id={item._id}
                   title={item.title}
-                  imageUrl={item.imageUrl}
+                  imageUrl={
+                    item.imageUrl
+                      ? `${process.env.REACT_APP_API_URL}${item.imageUrl}`
+                      : ""
+                  }
                   user={item.user}
                   createdAt={item.createdAt}
                   viewsCount={item.viewsCount}

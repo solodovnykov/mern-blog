@@ -1,15 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../axios";
 
-export const fetchPosts = createAsyncThunk("/posts/fetchPosts", async () => {
+export const fetchPosts = createAsyncThunk("posts/fetchPosts", async () => {
   const { data } = await axios.get("/posts");
   return data;
 });
 
-export const fetchTags = createAsyncThunk("/posts/fetchTags", async () => {
+export const fetchTags = createAsyncThunk("posts/fetchTags", async () => {
   const { data } = await axios.get("/tags");
   return data;
 });
+
+export const fetchRemovePost = createAsyncThunk(
+  "posts/fetchRemovePost",
+  async (id) => axios.delete(`/posts/${id}`)
+);
 
 const initialState = {
   posts: {
@@ -27,6 +32,7 @@ const postsSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: {
+    //GET Posts
     [fetchPosts.pending]: (state) => {
       state.posts.items = [];
       state.posts.status = "loading";
@@ -39,6 +45,8 @@ const postsSlice = createSlice({
       state.posts.items = [];
       state.posts.status = "error";
     },
+
+    //GET Tags
     [fetchTags.pending]: (state) => {
       state.tags.items = [];
       state.tags.status = "loading";
@@ -50,6 +58,14 @@ const postsSlice = createSlice({
     [fetchTags.rejected]: (state) => {
       state.tags.items = [];
       state.tags.status = "error";
+    },
+
+    //DELETE Post
+    [fetchRemovePost.pending]: (state, action) => {
+      state.posts.items.data = state.posts.items.data.filter(
+        (obj) => obj._id !== action.meta.arg
+      );
+      console.log(action.meta.arg);
     },
   },
 });

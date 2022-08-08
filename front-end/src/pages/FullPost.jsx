@@ -6,7 +6,7 @@ import { Post } from "../components/Post";
 import { Index } from "../components/AddComment";
 import { CommentsBlock } from "../components/CommentsBlock";
 import { useEffect } from "react";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 
 import axios from "../axios";
 
@@ -36,15 +36,18 @@ export const FullPost = () => {
       <Post
         _id={data._id}
         title={data.title}
-        imageUrl={data.imageUrl}
+        imageUrl={
+          data.imageUrl
+            ? `${process.env.REACT_APP_API_URL}${data.imageUrl}`
+            : ""
+        }
         user={data.user}
         createdAt={data.createdAt}
         viewsCount={data.viewsCount}
         commentsCount={3}
         tags={data.tags}
         isFullPost>
-        <p>{data.text}</p>
-        <ReactMarkdown children={data.text}/>
+        <ReactMarkdown children={data.text} />
       </Post>
       <CommentsBlock
         items={[
