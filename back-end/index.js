@@ -3,6 +3,7 @@ import multer from "multer";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import sharp from "sharp";
 
 import {
   registerValidation,
@@ -54,10 +55,22 @@ app.post(
 );
 app.get("/auth/me", checkAuth, UserController.getMe);
 
-app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
-  res.json({
-    url: `/uploads/${req.file.originalname}`,
-  });
+app.post("/upload", checkAuth, upload.single("image"), async (req, res) => {
+  try {
+    // const { path, originalname } = req.file;
+    // const timestamp = new Date().toISOString();
+    // const ref = `${timestamp}-${originalname}.webp`;
+    // console.log("req.file:", req.file);
+
+    // await sharp(path)
+    //   .webp({ quality: 20 })
+    //   .toFile("./uploads/" + ref);
+    res.json({
+      url: `/uploads/${req.file.originalname}`,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 app.get("/tags", PostController.getLastTags);
