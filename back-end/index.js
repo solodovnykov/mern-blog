@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import sharp from "sharp";
+import path from "path";
+import fs from "fs";
 
 import {
   registerValidation,
@@ -12,6 +14,10 @@ import {
 } from "./validation.js";
 import { UserController, PostController } from "./controllers/index.js";
 import { checkAuth, handleValidationErrors } from "./utils/index.js";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -27,11 +33,12 @@ mongoose
 const app = express();
 
 const storage = multer.diskStorage({
-  destination: (_, __, cb) => {
-    cb(null, "uploads");
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
   },
-  filename: (_, file, cb) => {
-    cb(null, file.originalname);
+
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + "-" + Date.now() + ".webp");
   },
 });
 
@@ -39,7 +46,7 @@ const upload = multer({ storage });
 
 app.use(express.json());
 app.use(cors());
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static("uploads/resized"));
 
 app.post(
   "/auth/register",
@@ -57,16 +64,20 @@ app.get("/auth/me", checkAuth, UserController.getMe);
 
 app.post("/upload", checkAuth, upload.single("image"), async (req, res) => {
   try {
-    // const { path, originalname } = req.file;
-    // const timestamp = new Date().toISOString();
-    // const ref = `${timestamp}-${originalname}.webp`;
-    // console.log("req.file:", req.file);
+    const { filename: image } = req.file;
 
-    // await sharp(path)
-    //   .webp({ quality: 20 })
-    //   .toFile("./uploads/" + ref);
+    await sharp(req.file.path)
+      .withMetadata({ density: 96 })
+      .resize({
+        width: 1920,
+        fit: sharp.fit.contain,
+      })
+      .webp({ quality: 80 })
+      .toFile(path.resolve(req.file.destination, "resized", image));
+    fs.unlinkSync(req.file.path);
+
     res.json({
-      url: `/uploads/${req.file.originalname}`,
+      url: `/uploads/${image}`,
     });
   } catch (error) {
     console.log(error);
