@@ -137,8 +137,16 @@ export const remove = async (req, res) => {
           success: true,
         });
 
+        console.log(fileUrl);
+
         //remove image from file storage
-        fs.unlinkSync(`.${fileUrl}`);
+        fs.access(`.${fileUrl}`, (error) => {
+          if (!error && fileUrl) {
+            fs.unlinkSync(`.${fileUrl}`);
+          } else {
+            console.warn(error);
+          }
+        });
       }
     );
   } catch (error) {
@@ -156,9 +164,17 @@ export const update = async (req, res) => {
     const post = await PostModel.findById(postId);
     const fileUrl = post.imageUrl;
 
-    if (req.body.imageUrl !== fileUrl) {
-      fs.unlinkSync(`.${fileUrl}`);
-    }
+    fs.access(`.${fileUrl}`, (error) => {
+      if (!error && req.body.imageUrl !== fileUrl) {
+        fs.unlinkSync(`.${fileUrl}`);
+      } else {
+        console.warn(error);
+      }
+    });
+
+    // if (req.body.imageUrl !== fileUrl) {
+    //   fs.unlinkSync(`.${fileUrl}`);
+    // }
 
     await PostModel.updateOne(
       {
