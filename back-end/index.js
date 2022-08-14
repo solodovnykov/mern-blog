@@ -14,10 +14,6 @@ import {
 } from "./validation.js";
 import { UserController, PostController } from "./controllers/index.js";
 import { checkAuth, handleValidationErrors } from "./utils/index.js";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -46,7 +42,7 @@ const upload = multer({ storage });
 
 app.use(express.json());
 app.use(cors());
-app.use("/uploads", express.static("uploads/resized"));
+app.use("/uploads/resized", express.static("uploads/resized"));
 
 app.post(
   "/auth/register",
@@ -62,12 +58,29 @@ app.post(
 );
 app.get("/auth/me", checkAuth, UserController.getMe);
 
+app.delete("/upload/:imageUrl", checkAuth, async (req, res) => {
+  try {
+    const url = req.params.imageUrl;
+
+    fs.access(`./uploads/resized/${url}`, (error) => {
+      if (error) {
+        console.warn(error);
+      } else {
+        fs.unlinkSync(`./uploads/resized/${url}`);
+      }
+    });
+
+    res.status(200).send("Image was deleted.");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 app.post("/upload", checkAuth, upload.single("image"), async (req, res) => {
   try {
     const { filename: image } = req.file;
 
     await sharp(req.file.path)
-      .withMetadata({ density: 96 })
       .resize({
         width: 1920,
         fit: sharp.fit.contain,
@@ -77,7 +90,7 @@ app.post("/upload", checkAuth, upload.single("image"), async (req, res) => {
     fs.unlinkSync(req.file.path);
 
     res.json({
-      url: `/uploads/${image}`,
+      url: `/uploads/resized/${image}`,
     });
   } catch (error) {
     console.log(error);

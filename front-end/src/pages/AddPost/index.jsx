@@ -36,8 +36,15 @@ export const AddPost = () => {
     }
   };
 
-  const onClickRemoveImage = () => {
-    setImageUrl("");
+  const onClickRemoveImage = async () => {
+    try {
+      const imageName = imageUrl.split("/").slice(-1)[0];
+      await axios.delete(`/upload/${imageName}`);
+      setImageUrl("");
+    } catch (error) {
+      console.log(error);
+      alert("Deletion failed");
+    }
   };
 
   const onChange = React.useCallback((value) => {
