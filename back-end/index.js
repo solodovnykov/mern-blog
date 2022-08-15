@@ -12,7 +12,11 @@ import {
   loginValidation,
   postCreateValidation,
 } from "./validation.js";
-import { UserController, PostController } from "./controllers/index.js";
+import {
+  UserController,
+  PostController,
+  UploadController,
+} from "./controllers/index.js";
 import { checkAuth, handleValidationErrors } from "./utils/index.js";
 
 dotenv.config();
@@ -58,44 +62,13 @@ app.post(
 );
 app.get("/auth/me", checkAuth, UserController.getMe);
 
-app.delete("/upload/:imageUrl", checkAuth, async (req, res) => {
-  try {
-    const url = req.params.imageUrl;
-
-    fs.access(`./uploads/resized/${url}`, (error) => {
-      if (error) {
-        console.warn(error);
-      } else {
-        fs.unlinkSync(`./uploads/resized/${url}`);
-      }
-    });
-
-    res.status(200).send("Image was deleted.");
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-app.post("/upload", checkAuth, upload.single("image"), async (req, res) => {
-  try {
-    const { filename: image } = req.file;
-
-    await sharp(req.file.path)
-      .resize({
-        width: 1920,
-        fit: sharp.fit.contain,
-      })
-      .webp({ quality: 80 })
-      .toFile(path.resolve(req.file.destination, "resized", image));
-    fs.unlinkSync(req.file.path);
-
-    res.json({
-      url: `/uploads/resized/${image}`,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-});
+app.delete("/upload/:imageUrl", checkAuth, UploadController.deleteImage);
+app.post(
+  "/upload",
+  checkAuth,
+  upload.single("image"),
+  UploadController.uploadImage
+);
 
 app.get("/tags", PostController.getLastTags);
 
