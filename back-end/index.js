@@ -116,6 +116,9 @@ app.patch(
   PostController.update
 );
 
+app.patch("/posts/like/:id", checkAuth, PostController.like);
+app.patch("/posts/unlike/:id", checkAuth, PostController.unlike);
+
 app.listen(process.env.PORT || 5555, (error) => {
   if (error) {
     return console.log(error);

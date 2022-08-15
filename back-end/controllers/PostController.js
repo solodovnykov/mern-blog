@@ -157,6 +157,60 @@ export const remove = async (req, res) => {
   }
 };
 
+export const like = async (req, res) => {
+  try {
+    const post = await PostModel.findById(req.params.id);
+
+    // Check if the post has already been liked
+    if (
+      post.likes.filter((like) => like.user.toString() === req.userId).length >
+      0
+    ) {
+      return res.status(500).json("Post already liked");
+    }
+
+    post.likes.unshift({ user: req.userId });
+
+    await post.save();
+
+    res.json(post.likes);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Failed to like post",
+    });
+  }
+};
+
+export const unlike = async (req, res) => {
+  try {
+    const post = await PostModel.findById(req.params.id);
+
+    // Check if the post has already been liked
+    if (
+      post.likes.filter((like) => like.user.toString() === req.userId)
+        .length === 0
+    ) {
+      return res.status(500).json("Post has not yet been liked");
+    }
+
+    const removeIndex = post.likes
+      .map((like) => like.user.toString())
+      .indexOf(req.userId);
+
+    post.likes.splice(removeIndex, 1);
+
+    await post.save();
+
+    res.json(post.likes);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Failed to like post",
+    });
+  }
+};
+
 export const update = async (req, res) => {
   try {
     const postId = req.params.id;

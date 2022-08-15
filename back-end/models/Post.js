@@ -24,6 +24,14 @@ const PostSchema = new mongoose.Schema(
       required: true,
     },
     imageUrl: String,
+    likes: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      },
+    ],
   },
   {
     timestamps: true,
